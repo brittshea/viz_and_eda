@@ -1,0 +1,72 @@
+---
+title: "ggplot"
+author: "Brittany Shea"
+date: "2022-09-29"
+output: html_document
+---
+#Libraries
+
+```{r}
+library(tidyverse)
+library(ggridges)
+```
+
+#Import Data
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+#Let's make a scatterplot
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax))+
+  geom_point()
+```
+
+```{r}
+weather_df %>%
+  drop_na() %>% 
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point()
+```
+
+#Let's keep making the same plot but different
+```{r}
+weather_scatterplot = 
+  weather_df %>%
+  drop_na() %>%
+  ggplot(aes(x = tmin, y = tmax)) 
+
+weather_scatterplot +
+  geom_point()
+```
+
+#Let's make more interesting plots
+#helps to find out if there's anything in here that I'm interested in:
+```{r}
+weather_df %>%
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point() +
+  geom_smooth()
+```
+
+# Let's get fancy
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) +
+  geom_smooth(se = FALSE) #get rid of error bars
+```
+
