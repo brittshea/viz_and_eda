@@ -70,3 +70,37 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
   geom_smooth(se = FALSE) #get rid of error bars
 ```
 
+# Maybe make separate panels
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  facet_grid(. ~ name)
+```
+
+# tmax vs tmin is boring, let's spice it up
+# show seasonal trends of maximum temp; include precipitation variable
+```{r}
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_point(alpha = .3) +
+  geom_smooth(se = FALSE)
+
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_point(aes(size = prcp), alpha = .3) +
+  geom_smooth(se = FALSE) + 
+  facet_grid(. ~ name) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) # make scale cleaner
+```
+
+# Some quick stuff
+#using hexogram geometry
+```{r}
+weather_df %>%
+  drop_na() %>% 
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_hex() 
+
+```
+
+
