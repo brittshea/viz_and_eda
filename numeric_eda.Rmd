@@ -138,3 +138,38 @@ weather_df %>%
   knitr::kable(digits = 2) #get a knitted table for rmarkdown document
 ```
 
+```{r}
+weather_df %>%
+  group_by(name) %>%
+  mutate(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    centered_tmax = tmax - mean_tmax) %>% 
+  ggplot(aes(x = date, y = centered_tmax, color = name)) + 
+    geom_point() 
+```
+
+#Lagged observations - includes lag by 1 observations
+#If need standard deviations of day to day temperature changes: just group by, mutate, & summarize 
+```{r}
+weather_df %>%
+  group_by(name) %>%
+  mutate(
+    yesterday_tmax = lag(tmax),
+    tmax_change = tmax - yesterday_tmax
+  ) %>%
+  summarize(
+    sd_tmax_change = sd(tmax_change, na.rm = TRUE)
+  )
+```
+
+#If you want ranks 
+```{r}
+weather_df %>%
+  group_by(name, month) %>%
+  mutate(
+    tmax_rank = min_rank(tmax) #this is a ranking function
+  ) %>%
+  filter(tmax_rank < 4) %>%
+  arrange(name, month, tmax_rank)
+```
+
