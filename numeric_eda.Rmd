@@ -27,5 +27,114 @@ weather_df =
     tmin = tmin / 10,
     tmax = tmax / 10,
     month = lubridate::floor_date(date, unit = "month")) %>%
-  select(name, id, everything())
+    select(name, id, everything())
 ```
+
+#`group_by()`
+
+```{r}
+weather_df %>%
+  group_by(name, month)
+```
+
+#Let's group and then summarize with GROUP & SUMMARIZE
+```{r}
+weather_df %>%
+  group_by(name,month) %>%
+  summarize(
+    n_obs = n()
+    )
+```
+
+#Or you can use COUNT
+```{r}
+weather_df %>%
+  count(name, month)
+```
+
+###Don't use table 
+
+#You can have multiple summaries
+
+```{r}
+weather_df %>%
+  group_by(month) %>%
+  summarize(
+    n_obs = n(),
+    n_days = n_distinct(date))
+```
+
+#Brief aside on 2X2 tables...
+```{r}
+weather_df %>% 
+  mutate(
+    cold = case_when(
+      tmax <  5 ~ "cold",
+      tmax >= 5 ~ "not_cold",
+      TRUE      ~ ""
+  )) %>% 
+  filter(name != "Waikiki_HA") %>% 
+  group_by(name, cold) %>% 
+  summarize(
+    n_obs = n()
+  ) %>% 
+  pivot_wider(
+    names_from = cold,
+    values_from = n_obs
+  )
+```
+
+#...but Janitor package does the same as 2x2 table but easier
+```{r}
+weather_df %>% 
+  mutate(cold = case_when(
+    tmax <  5 ~ "cold",
+    tmax >= 5 ~ "not_cold",
+    TRUE     ~ ""
+  )) %>% 
+  filter(name != "Waikiki_HA") %>% 
+  janitor::tabyl(name, cold)
+```
+
+#General summaries
+
+```{r}
+weather_df %>%
+  group_by(name, month) %>%
+  summarize(
+    n_obs = n(),
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    sd_precip = sd(precip),
+    median_tmax = median(tmax, na.rm = TRUE)
+  )
+```
+
+```{r}
+weather_df %>%
+  group_by(name, month) %>%
+  summarize(across(prcp:tmin, mean))
+```
+
+#This is a dataframe
+
+```{r}
+weather_df %>%
+  group_by(name, month) %>%
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE)
+  ) %>%
+  ggplot(aes(x = month, y = mean_tmax, color = name)) +
+  geom_point() + geom_line() + 
+    theme(legend.position = "bottom")
+```
+
+```{r}
+weather_df %>%
+  group_by(name, month) %>%
+  summarize(mean_tmax = mean(tmax)) %>% 
+  pivot_wider(
+    names_from = name,
+    values_from = mean_tmax) %>% 
+  knitr::kable(digits = 2) #get a knitted table for rmarkdown document
+```
+
